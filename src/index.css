@@ -44,57 +44,85 @@ button {
   position: sticky;
   top: 0;
   z-index: 100;
-  background: rgba(0, 0, 0, 0.8);
+  background: rgba(0, 0, 0, 0.85);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border-bottom: 1px solid var(--glass-border);
   display: flex;
-  justify-content: space-between;
+  flex-direction: column;
+}
+
+.header-top {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
   align-items: center;
   padding: 0 5%;
-  height: 100px;
-}
-
-.header-logo-img {
   height: 80px;
-  cursor: pointer;
-  transition: transform 0.3s ease;
 }
 
-.header-logo-img:hover {
-  transform: scale(1.05);
+.header-bottom {
+  border-top: 1px solid rgba(255,255,255,0.05);
+  display: flex;
+  justify-content: center;
+  padding: 10px 0;
 }
 
 .header-categories {
   display: flex;
-  gap: 2rem;
-  margin-left: 2rem;
+  gap: 2.5rem;
+  overflow-x: auto;
+  padding: 0 2rem;
+  scrollbar-width: none;
 }
 
+.header-categories::-webkit-scrollbar { display: none; }
+
 .header-cat-link {
-  font-size: 0.75rem;
-  font-weight: 700;
-  letter-spacing: 1.5px;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 2px;
   color: var(--text-muted);
   cursor: pointer;
   transition: all 0.3s;
-  padding: 10px 0;
-  border-bottom: 2px solid transparent;
+  text-transform: uppercase;
+  white-space: nowrap;
 }
 
 .header-cat-link:hover, .header-cat-link.active {
   color: var(--accent-primary);
-  border-bottom-color: var(--accent-primary);
 }
 
-.desktop-only {
-  display: none;
+.header-right {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 1.5rem;
 }
 
-@media (min-width: 1024px) {
-  .desktop-only {
-    display: flex;
-  }
+.typo-logo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
+  line-height: 1;
+}
+
+.logo-main {
+  font-size: 1.6rem;
+  font-weight: 200;
+  letter-spacing: 14px;
+  color: #fff;
+  margin-right: -14px;
+}
+
+.logo-sub {
+  font-size: 0.8rem;
+  font-weight: 900;
+  letter-spacing: 6px;
+  background: linear-gradient(to right, var(--accent-primary), #fff, var(--accent-primary));
+  -webkit-background-clip: text;
+  color: transparent;
+  margin-top: 2px;
 }
 
 .typo-logo {

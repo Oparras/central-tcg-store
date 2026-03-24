@@ -2,41 +2,51 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { ShoppingCart, Menu, Search, User, ChevronLeft, ChevronRight, X, Trash2, Plus, Minus } from 'lucide-react';
 import './index.css';
 
-// Datos reales de productos TCG con soporte para múltiples categorías
+// Datos reales de productos TCG con soporte para múltiples categorías y Naruto
 const productos = [
   { 
     id: 1, name: 'Riftbound: Vendetta Vault', categories: ['RIFTBOUND', 'ACCESSORIES'], pvp: 34.99, condition: 'Nuevo/Sellado', 
     img: 'https://b2b.asmodee.es/product/image/medium/rb04vb01en_1.png',
-    desc: '¡Ábrete paso con el Vendetta Vault! Este pack incluye 6 sobres de Riftbound: Vendetta, 36 runas básicas para potenciar tus mazos y 3 fichas full-art de doble cara. Todo guardado en una caja oficial de alta calidad.'
+    desc: '¡Ábrete paso con el Vendetta Vault! Este pack incluye 6 sobres de Riftbound: Vendetta, 36 runas básicas para potenciar tus mazos y 3 fichas full-art de doble cara.'
   },
   { 
-    id: 2, name: 'Riftbound: Unleashed Vault', categories: ['RIFTBOUND', 'ACCESSORIES'], pvp: 34.99, condition: 'Nuevo/Sellado', 
-    img: 'https://b2b.asmodee.es/product/image/medium/rb03bs01en_1.png',
-    desc: 'El Unleashed Vault es la pieza central para cualquier coleccionista. Contiene 6 sobres de la colección Unleashed y accesorios exclusivos para dominar el tablero de juego.'
+    id: 2, name: 'Riftbound: Unleashed Booster Display (24)', categories: ['RIFTBOUND', 'DISPLAYS'], pvp: 108.00, condition: 'Nuevo/Sellado', 
+    img: 'https://b2b.asmodee.es/product/image/medium/rb03bd01den_1.png',
+    desc: 'Caja completa de 24 sobres de la expansión Unleashed. Expande tu mazo con poderosos hechizos y unidades del universo League of Legends.'
   },
   { 
-    id: 3, name: 'Riftbound: Origins Booster Display (24)', categories: ['RIFTBOUND', 'DISPLAYS'], pvp: 120.00, condition: 'Nuevo/Sellado', 
-    img: 'https://b2b.asmodee.es/product/image/medium/rb01bd01den_1.png',
-    desc: 'Caja completa de 24 sobres de la expansión Origins. Ideal para draft o para completar tu colección de campeones de Runeterra.'
+    id: 3, name: 'Riftbound: Unleashed Art Sleeves (100)', categories: ['RIFTBOUND', 'ACCESSORIES'], pvp: 11.99, condition: 'Nuevo/Sellado', 
+    img: 'https://b2b.asmodee.es/product/image/medium/rb03as01en_1.png',
+    desc: 'Fundas de alta calidad con arte exclusivo de la expansión Unleashed. Pack de 100 fundas con acabado mate para juego profesional.'
   },
   { 
-    id: 4, name: 'One Piece TCG: Booster Display OP14 (24)', categories: ['ONE PIECE TCG', 'DISPLAYS'], pvp: 107.76, condition: 'Nuevo/Sellado', 
+    id: 4, name: 'One Piece TCG: Booster Display OP14 (24)', categories: ['ONE PIECE TCG', 'DISPLAYS'], pvp: 132.00, condition: 'Nuevo/Sellado', 
     img: 'https://b2b.asmodee.es/product/image/small/bopop14den_124183_0.png',
-    desc: 'Caja de 24 sobres de la colección OP14. Incluye cartas Leader, Common, Uncommon, Rare y las exclusivas Super Rare y Secret Rare del 3er Aniversario.'
+    desc: 'Caja de 24 sobres de la colección OP14. Incluye cartas del 3er Aniversario y arte alternativo exclusivo.'
   },
   { 
-    id: 5, name: 'One Piece TCG: 3rd Anniversary Set', categories: ['ONE PIECE TCG', 'ACCESSORIES'], pvp: 199.99, condition: 'Nuevo/Sellado', 
+    id: 5, name: 'One Piece TCG: 3rd Anniversary Set', categories: ['ONE PIECE TCG', 'ACCESSORIES', 'NOVEDADES'], pvp: 199.99, condition: 'Nuevo/Sellado', 
     img: 'https://b2b.asmodee.es/product/image/small/bopj3aen_1.png',
-    desc: 'Set de lujo limitado por el 3er aniversario. Incluye Storage Box, Card Case, 70 fundas, tapete de juego, 3 cartas promo y dados especiales.'
+    desc: 'Set de lujo limitado. Incluye Storage Box, tapete de juego y cartas promo especiales por el aniversario.'
   },
   { 
-    id: 6, name: 'One Piece TCG: Premium Cards Vol.5', categories: ['ONE PIECE TCG', 'ACCESSORIES'], pvp: 24.99, condition: 'Nuevo/Sellado', 
-    img: 'https://b2b.asmodee.es/product/image/medium/bopbs05en_1.png',
-    desc: 'Selección de cartas premium con texturas de lujo. Contiene 12 cartas Holo + Textured Foil de los personajes más icónicos de One Piece.'
+    id: 6, name: 'Naruto Earth Scroll Edition Display (20)', categories: ['NARUTO TCG', 'DISPLAYS'], pvp: 54.95, condition: 'Nuevo/Sellado', 
+    img: 'https://b2b.asmodee.es/Content/Images/Products/KYNRTE02D.jpg',
+    desc: 'Display de 20 sobres de la edición Earth Scroll. Colecciona a los ninjas más poderosos de la aldea oculta de la hoja.'
+  },
+  { 
+    id: 7, name: 'Naruto Heaven Scroll Edition Display (12)', categories: ['NARUTO TCG', 'DISPLAYS'], pvp: 32.95, condition: 'Nuevo/Sellado', 
+    img: 'https://b2b.asmodee.es/Content/Images/Products/KYNRTH02D.jpg',
+    desc: 'Edición compacta Heaven Scroll con 12 sobres. Una forma perfecta de empezar tu colección de cartas Kayou.'
+  },
+  { 
+    id: 8, name: 'Naruto Special Pack: Naruto vs Sasuke', categories: ['NARUTO TCG', 'NOVEDADES'], pvp: 12.99, condition: 'Nuevo/Sellado', 
+    img: 'https://b2b.asmodee.es/Content/Images/Products/KYNRTM01E.jpg',
+    desc: 'Pack especial que celebra la rivalidad legendaria entre Naruto y Sasuke con cartas exclusivas.'
   }
 ];
 
-const categories = ['TODOS', 'RIFTBOUND', 'ONE PIECE TCG', 'ACCESSORIES'];
+const categoriesData = ['TODOS', 'RIFTBOUND', 'ONE PIECE TCG', 'NARUTO TCG', 'ACCESSORIES', 'NOVEDADES'];
 
 const bannerImages = [
   "/hero-riftbound.png",
@@ -151,21 +161,7 @@ export default function App() {
         </div>
       )}
 
-      {/* SIDE MENU (Burger) */}
-      <aside className={`sidebar-menu ${isMenuOpen ? 'open' : ''}`}>
-        <div className="sidebar-header">
-          <h3>MENÚ</h3>
-          <X onClick={() => setIsMenuOpen(false)} style={{ cursor: 'pointer' }} />
-        </div>
-        <nav className="sidebar-links">
-          <a href="#" onClick={() => setIsMenuOpen(false)}>NOVEDADES</a>
-          <a href="#" onClick={() => setIsMenuOpen(false)}>POKÉMON TCG</a>
-          <a href="#" onClick={() => setIsMenuOpen(false)}>MAGIC: THE GATHERING</a>
-          <a href="#" onClick={() => setIsMenuOpen(false)}>YU-GI-OH!</a>
-          <a href="#" onClick={() => setIsMenuOpen(false)}>RIFTBOUND</a>
-          <a href="#" onClick={() => setIsMenuOpen(false)}>ACCESORIOS</a>
-        </nav>
-      </aside>
+      {/* SIDE MENU (ELIMINADO) */}
 
       {/* CART DRAWER */}
       <aside className={`cart-drawer ${isCartOpen ? 'open' : ''}`}>
@@ -226,46 +222,50 @@ export default function App() {
 
       {/* HEADER */}
       <header className="nav-header">
-        <div className="header-left">
-          <Menu size={28} onClick={() => setIsMenuOpen(true)} className="icon-hover" style={{ color: 'var(--text-main)' }} />
-          <div className="header-categories desktop-only">
-            {categories.map(cat => (
+        <div className="header-top">
+          <div className="header-top-left"></div>
+          <div className="header-center" onClick={() => { setActiveCategory('TODOS'); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>
+            <div className="typo-logo">
+              <span className="logo-main">CENTRAL</span>
+              <span className="logo-sub">TCG</span>
+            </div>
+          </div>
+          <div className="header-right">
+            <div className={`search-bar-inline ${isSearchOpen ? 'active' : ''}`}>
+              <input 
+                type="text" 
+                placeholder="Buscar..." 
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onFocus={() => setIsSearchOpen(true)}
+                onBlur={() => !searchQuery && setIsSearchOpen(false)}
+              />
+            </div>
+            <Search size={20} onClick={() => setIsSearchOpen(!isSearchOpen)} className="icon-hover" />
+            <User size={20} onClick={() => setIsUserOpen(true)} className="icon-hover" />
+            <div className="cart-trigger" onClick={() => setIsCartOpen(true)}>
+              <ShoppingCart size={20} className="icon-hover" />
+              {cartCount > 0 && <span className="cart-badge">{cartCount}</span>}
+            </div>
+          </div>
+        </div>
+        
+        <nav className="header-bottom">
+          <div className="header-categories">
+            {categoriesData.map(cat => (
               <span 
                 key={cat} 
                 className={`header-cat-link ${activeCategory === cat ? 'active' : ''}`}
-                onClick={() => setActiveCategory(cat)}
+                onClick={() => {
+                  setActiveCategory(cat);
+                  if (window.scrollY < 400) window.scrollTo({ top: 800, behavior: 'smooth' });
+                }}
               >
                 {cat}
               </span>
             ))}
           </div>
-        </div>
-        
-        <div className="header-center" onClick={() => { setActiveCategory('TODOS'); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>
-          <div className="typo-logo">
-            <span className="logo-main">CENTRAL</span>
-            <span className="logo-sub">TCG</span>
-          </div>
-        </div>
-
-        <div className="header-right">
-          <div className={`search-bar-inline ${isSearchOpen ? 'active' : ''}`}>
-            <input 
-              type="text" 
-              placeholder="Buscar Riftbound, One Piece..." 
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              onFocus={() => setIsSearchOpen(true)}
-              onBlur={() => !searchQuery && setIsSearchOpen(false)}
-            />
-          </div>
-          <Search size={22} onClick={() => setIsSearchOpen(!isSearchOpen)} className="icon-hover" />
-          <User size={22} onClick={() => setIsUserOpen(true)} className="icon-hover" />
-          <div className="cart-trigger" onClick={() => setIsCartOpen(true)}>
-            <ShoppingCart size={22} className="icon-hover" />
-            {cartCount > 0 && <span className="cart-badge">{cartCount}</span>}
-          </div>
-        </div>
+        </nav>
       </header>
 
       {/* SEARCH RESULTS OVERLAY (Only if searching) */}
