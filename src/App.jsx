@@ -13,9 +13,9 @@ const productos = [
 ];
 
 const bannerImages = [
+  "/hero-riftbound.png",
   "https://images.unsplash.com/photo-1621600411688-4be93cd68504?auto=format&fit=crop&q=80&w=2000", // TCG theme
-  "https://images.unsplash.com/photo-1620336655055-088d06e36bf0?auto=format&fit=crop&q=80&w=2000", // Dark gaming
-  "https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&q=80&w=2000"  // Esports vibe
+  "https://images.unsplash.com/photo-1620336655055-088d06e36bf0?auto=format&fit=crop&q=80&w=2000"  // Dark gaming
 ];
 
 export default function App() {
@@ -142,8 +142,8 @@ export default function App() {
           <Menu size={28} onClick={() => setIsMenuOpen(true)} className="icon-hover" />
         </div>
         
-        <div className="header-center logo-text">
-          CENTRAL TCG
+        <div className="header-center">
+          <img src="/logo-central.png" alt="Central TCG Logo" style={{ height: '60px', cursor: 'pointer' }} onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} />
         </div>
 
         <div className="header-right">
@@ -182,11 +182,15 @@ export default function App() {
             alt="TCG Banner" 
             className="hero-img"
           />
-          <div className="hero-overlay-content">
-            <h1>RIFTBOUND: DISPONIBLE YA</h1>
-            <p>Descubre el nuevo amanecer de los campeones de League of Legends</p>
-            <button className="btn-primary-ghost" onClick={() => window.scrollTo({ top: 800, behavior: 'smooth'})}>
-              EXPLORAR NOVEDADES
+          <div className="hero-overlay-content" style={{ background: 'linear-gradient(to bottom, transparent, rgba(0,0,0,0.9))' }}>
+            {activeBanner !== 0 && (
+              <>
+                <h1>CENTRAL TCG STORE</h1>
+                <p>Tu distribuidor de confianza para producto sellado premium</p>
+              </>
+            )}
+            <button className={`${activeBanner === 0 ? 'btn-primary' : 'btn-primary-ghost'}`} onClick={() => window.scrollTo({ top: 800, behavior: 'smooth'})}>
+              {activeBanner === 0 ? 'VER PRODUCTOS' : 'EXPLORAR NOVEDADES'}
             </button>
           </div>
         </div>
