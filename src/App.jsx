@@ -2,35 +2,35 @@ import React, { useState, useMemo } from 'react';
 import { ShoppingCart, Menu, Search, User, ChevronLeft, ChevronRight, X, Trash2, Plus, Minus } from 'lucide-react';
 import './index.css';
 
-// Datos reales de productos TCG extraídos de Asmodee B2B
+// Datos reales de productos TCG con soporte para múltiples categorías
 const productos = [
   { 
-    id: 1, name: 'Riftbound: Vendetta Vault', category: 'Vaults', pvp: 34.99, condition: 'Nuevo/Sellado', 
+    id: 1, name: 'Riftbound: Vendetta Vault', categories: ['RIFTBOUND', 'ACCESSORIES'], pvp: 34.99, condition: 'Nuevo/Sellado', 
     img: 'https://b2b.asmodee.es/product/image/medium/rb04vb01en_1.png',
     desc: '¡Ábrete paso con el Vendetta Vault! Este pack incluye 6 sobres de Riftbound: Vendetta, 36 runas básicas para potenciar tus mazos y 3 fichas full-art de doble cara. Todo guardado en una caja oficial de alta calidad.'
   },
   { 
-    id: 2, name: 'Riftbound: Unleashed Vault', category: 'Vaults', pvp: 34.99, condition: 'Nuevo/Sellado', 
+    id: 2, name: 'Riftbound: Unleashed Vault', categories: ['RIFTBOUND', 'ACCESSORIES'], pvp: 34.99, condition: 'Nuevo/Sellado', 
     img: 'https://b2b.asmodee.es/product/image/medium/rb03bs01en_1.png',
     desc: 'El Unleashed Vault es la pieza central para cualquier coleccionista. Contiene 6 sobres de la colección Unleashed y accesorios exclusivos para dominar el tablero de juego.'
   },
   { 
-    id: 3, name: 'Riftbound: Origins Booster Display (24)', category: 'Displays', pvp: 120.00, condition: 'Nuevo/Sellado', 
+    id: 3, name: 'Riftbound: Origins Booster Display (24)', categories: ['RIFTBOUND', 'DISPLAYS'], pvp: 120.00, condition: 'Nuevo/Sellado', 
     img: 'https://b2b.asmodee.es/product/image/medium/rb01bd01den_1.png',
     desc: 'Caja completa de 24 sobres de la expansión Origins. Ideal para draft o para completar tu colección de campeones de Runeterra.'
   },
   { 
-    id: 4, name: 'One Piece TCG: Booster Display OP14 (24)', category: 'ONE PIECE TCG', pvp: 107.76, condition: 'Nuevo/Sellado', 
+    id: 4, name: 'One Piece TCG: Booster Display OP14 (24)', categories: ['ONE PIECE TCG', 'DISPLAYS'], pvp: 107.76, condition: 'Nuevo/Sellado', 
     img: 'https://b2b.asmodee.es/product/image/small/bopop14den_124183_0.png',
     desc: 'Caja de 24 sobres de la colección OP14. Incluye cartas Leader, Common, Uncommon, Rare y las exclusivas Super Rare y Secret Rare del 3er Aniversario.'
   },
   { 
-    id: 5, name: 'One Piece TCG: 3rd Anniversary Set', category: 'ONE PIECE TCG', pvp: 199.99, condition: 'Nuevo/Sellado', 
+    id: 5, name: 'One Piece TCG: 3rd Anniversary Set', categories: ['ONE PIECE TCG', 'ACCESSORIES'], pvp: 199.99, condition: 'Nuevo/Sellado', 
     img: 'https://b2b.asmodee.es/product/image/small/bopj3aen_1.png',
     desc: 'Set de lujo limitado por el 3er aniversario. Incluye Storage Box, Card Case, 70 fundas, tapete de juego, 3 cartas promo y dados especiales.'
   },
   { 
-    id: 6, name: 'One Piece TCG: Premium Cards Vol.5', category: 'ONE PIECE TCG', pvp: 24.99, condition: 'Nuevo/Sellado', 
+    id: 6, name: 'One Piece TCG: Premium Cards Vol.5', categories: ['ONE PIECE TCG', 'ACCESSORIES'], pvp: 24.99, condition: 'Nuevo/Sellado', 
     img: 'https://b2b.asmodee.es/product/image/medium/bopbs05en_1.png',
     desc: 'Selección de cartas premium con texturas de lujo. Contiene 12 cartas Holo + Textured Foil de los personajes más icónicos de One Piece.'
   }
@@ -55,11 +55,11 @@ export default function App() {
   const [activeCategory, setActiveCategory] = useState('TODOS');
   const [activeBanner, setActiveBanner] = useState(0);
 
-  // Filtrado de productos por búsqueda y categoría
+  // Filtrado de productos por búsqueda y categorías (soporte multi-tag)
   const filteredProducts = useMemo(() => {
     return productos.filter(p => {
       const matchesSearch = p.name.toLowerCase().includes(searchQuery.toLowerCase());
-      const matchesCategory = activeCategory === 'TODOS' || p.category.toUpperCase().includes(activeCategory);
+      const matchesCategory = activeCategory === 'TODOS' || p.categories.includes(activeCategory);
       return matchesSearch && matchesCategory;
     });
   }, [searchQuery, activeCategory]);
@@ -215,8 +215,11 @@ export default function App() {
           </div>
         </div>
         
-        <div className="header-center">
-          <img src="/logo-central.png" alt="Central TCG Logo" className="header-logo-img" onClick={() => { setActiveCategory('TODOS'); window.scrollTo({ top: 0, behavior: 'smooth' }); }} />
+        <div className="header-center" onClick={() => { setActiveCategory('TODOS'); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>
+          <div className="typo-logo">
+            <span className="logo-main">CENTRAL</span>
+            <span className="logo-sub">TCG</span>
+          </div>
         </div>
 
         <div className="header-right">
@@ -267,7 +270,13 @@ export default function App() {
                 <p>Tu distribuidor de confianza para producto sellado premium</p>
               </>
             )}
-            <button className={`${activeBanner === 0 ? 'btn-primary' : 'btn-primary-ghost'}`} onClick={() => window.scrollTo({ top: 800, behavior: 'smooth'})}>
+            <button 
+              className={`${activeBanner === 0 ? 'btn-primary' : 'btn-primary-ghost'}`} 
+              onClick={() => {
+                setActiveCategory(activeBanner === 0 ? 'RIFTBOUND' : 'TODOS');
+                window.scrollTo({ top: 800, behavior: 'smooth'});
+              }}
+            >
               {activeBanner === 0 ? 'VER PRODUCTOS' : 'EXPLORAR NOVEDADES'}
             </button>
           </div>

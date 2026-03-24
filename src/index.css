@@ -97,13 +97,40 @@ button {
   }
 }
 
-.logo-text {
-  font-size: 1.5rem;
-  font-weight: 800;
-  background: linear-gradient(to right, var(--text-main), var(--accent-primary));
+.typo-logo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
+  line-height: 1;
+  transition: transform 0.3s ease;
+}
+
+.typo-logo:hover {
+  transform: scale(1.05);
+}
+
+.logo-main {
+  font-size: 1.8rem;
+  font-weight: 200;
+  letter-spacing: 12px;
+  color: #fff;
+  margin-right: -12px; /* para compensar el letter-spacing del final */
+}
+
+.logo-sub {
+  font-size: 0.9rem;
+  font-weight: 900;
+  letter-spacing: 4px;
+  background: linear-gradient(to right, var(--accent-primary), #fff, var(--accent-primary));
   -webkit-background-clip: text;
   color: transparent;
-  letter-spacing: -0.5px;
+  margin-top: 5px;
+  text-shadow: 0 0 20px rgba(16, 185, 129, 0.2);
+}
+
+.logo-text {
+  display: none; /* Antiguo logo */
 }
 
 /* Base button */
