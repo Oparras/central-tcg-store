@@ -50,10 +50,23 @@ export default function App() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isUserOpen, setIsUserOpen] = useState(false);
+  const [isCookieVisible, setIsCookieVisible] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [activeCategory, setActiveCategory] = useState('TODOS');
   const [activeBanner, setActiveBanner] = useState(0);
+
+  useEffect(() => {
+    const consent = localStorage.getItem('cookie-consent');
+    if (!consent) {
+      setTimeout(() => setIsCookieVisible(true), 1500);
+    }
+  }, []);
+
+  const acceptCookies = () => {
+    localStorage.setItem('cookie-consent', 'true');
+    setIsCookieVisible(false);
+  };
 
   // Filtrado de productos por búsqueda y categorías (soporte multi-tag)
   const filteredProducts = useMemo(() => {
@@ -120,6 +133,19 @@ export default function App() {
                   Añadir al Carrito
                 </button>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* COOKIE BANNER */}
+      {isCookieVisible && (
+        <div className="cookie-banner">
+          <div className="cookie-content">
+            <p>Utilizamos cookies para mejorar tu experiencia en Central TCG. ¿Aceptas nuestra política de cookies?</p>
+            <div className="cookie-buttons">
+              <button className="btn-cookie-ghost" onClick={() => setIsCookieVisible(false)}>Configurar</button>
+              <button className="btn-cookie" onClick={acceptCookies}>Aceptar Todo</button>
             </div>
           </div>
         </div>
@@ -329,9 +355,9 @@ export default function App() {
       {/* FOOTER */}
       <footer className="main-footer">
         <div className="footer-content">
-          <h3>CENTRAL TCG</h3>
+          <div className="footer-logo">CENTRAL TCG</div>
           <p>© 2026 Central TCG España. Distribución oficial de Riftbound.</p>
-          <div className="social-dummy">
+          <div className="social-links">
             <span>Instagram</span> • <span>Twitter</span> • <span>Discord</span>
           </div>
         </div>
