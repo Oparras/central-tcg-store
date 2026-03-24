@@ -143,7 +143,7 @@ export default function App() {
         </div>
         
         <div className="header-center">
-          <img src="/logo-central.png" alt="Central TCG Logo" style={{ height: '60px', cursor: 'pointer' }} onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} />
+          <img src="/logo-central.png" alt="Central TCG Logo" style={{ height: '100px', cursor: 'pointer' }} onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} />
         </div>
 
         <div className="header-right">
@@ -183,7 +183,12 @@ export default function App() {
             className="hero-img"
           />
           <div className="hero-overlay-content" style={{ background: 'linear-gradient(to bottom, transparent, rgba(0,0,0,0.9))' }}>
-            {activeBanner !== 0 && (
+            {activeBanner === 0 ? (
+              <>
+                <h1>RIFTBOUND: LEAGUE OF LEGENDS TCG</h1>
+                <p>El juego de cartas oficial de Riot Games ya está aquí</p>
+              </>
+            ) : (
               <>
                 <h1>CENTRAL TCG STORE</h1>
                 <p>Tu distribuidor de confianza para producto sellado premium</p>
