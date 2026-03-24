@@ -356,7 +356,7 @@ export default function App() {
       <footer className="main-footer">
         <div className="footer-content">
           <div className="footer-logo">CENTRAL TCG</div>
-          <p>© 2026 Central TCG España. Distribución oficial de Riftbound.</p>
+          <p>© 2026 Central TCG España.</p>
           <div className="social-links">
             <span>Instagram</span> • <span>Twitter</span> • <span>Discord</span>
           </div>
