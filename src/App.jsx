@@ -2,15 +2,41 @@ import React, { useState, useMemo } from 'react';
 import { ShoppingCart, Menu, Search, User, ChevronLeft, ChevronRight, X, Trash2, Plus, Minus } from 'lucide-react';
 import './index.css';
 
-// Datos reales de productos Riftbound extraídos de Asmodee B2B
+// Datos reales de productos TCG extraídos de Asmodee B2B
 const productos = [
-  { id: 1, name: 'Riftbound: Vendetta Vault', category: 'Vaults', pvp: 34.99, condition: 'Nuevo/Sellado', img: 'https://b2b.asmodee.es/product/image/medium/rb04vb01en_1.png' },
-  { id: 2, name: 'Riftbound: Unleashed Vault', category: 'Vaults', pvp: 34.99, condition: 'Nuevo/Sellado', img: 'https://b2b.asmodee.es/product/image/medium/rb03bs01en_1.png' },
-  { id: 3, name: 'Riftbound: Origins Booster Display (24)', category: 'Displays', pvp: 120.00, condition: 'Nuevo/Sellado', img: 'https://b2b.asmodee.es/product/image/medium/rb01bd01den_1.png' },
-  { id: 4, name: 'Riftbound: Vendetta Display (24)', category: 'Displays', pvp: 120.00, condition: 'Nuevo/Sellado', img: 'https://b2b.asmodee.es/product/image/medium/rb04bd01den_1.png' },
-  { id: 5, name: 'Riftbound: Unleashed Display (24)', category: 'Displays', pvp: 120.00, condition: 'Nuevo/Sellado', img: 'https://b2b.asmodee.es/product/image/medium/rb03bd01den_1.png' },
-  { id: 6, name: 'Riftbound: Spiritforged Display (24)', category: 'Displays', pvp: 120.00, condition: 'Nuevo/Sellado', img: 'https://b2b.asmodee.es/product/image/medium/rb02bd01den_1.png' }
+  { 
+    id: 1, name: 'Riftbound: Vendetta Vault', category: 'Vaults', pvp: 34.99, condition: 'Nuevo/Sellado', 
+    img: 'https://b2b.asmodee.es/product/image/medium/rb04vb01en_1.png',
+    desc: '¡Ábrete paso con el Vendetta Vault! Este pack incluye 6 sobres de Riftbound: Vendetta, 36 runas básicas para potenciar tus mazos y 3 fichas full-art de doble cara. Todo guardado en una caja oficial de alta calidad.'
+  },
+  { 
+    id: 2, name: 'Riftbound: Unleashed Vault', category: 'Vaults', pvp: 34.99, condition: 'Nuevo/Sellado', 
+    img: 'https://b2b.asmodee.es/product/image/medium/rb03bs01en_1.png',
+    desc: 'El Unleashed Vault es la pieza central para cualquier coleccionista. Contiene 6 sobres de la colección Unleashed y accesorios exclusivos para dominar el tablero de juego.'
+  },
+  { 
+    id: 3, name: 'Riftbound: Origins Booster Display (24)', category: 'Displays', pvp: 120.00, condition: 'Nuevo/Sellado', 
+    img: 'https://b2b.asmodee.es/product/image/medium/rb01bd01den_1.png',
+    desc: 'Caja completa de 24 sobres de la expansión Origins. Ideal para draft o para completar tu colección de campeones de Runeterra.'
+  },
+  { 
+    id: 4, name: 'One Piece TCG: Booster Display OP14 (24)', category: 'ONE PIECE TCG', pvp: 107.76, condition: 'Nuevo/Sellado', 
+    img: 'https://b2b.asmodee.es/product/image/small/bopop14den_124183_0.png',
+    desc: 'Caja de 24 sobres de la colección OP14. Incluye cartas Leader, Common, Uncommon, Rare y las exclusivas Super Rare y Secret Rare del 3er Aniversario.'
+  },
+  { 
+    id: 5, name: 'One Piece TCG: 3rd Anniversary Set', category: 'ONE PIECE TCG', pvp: 199.99, condition: 'Nuevo/Sellado', 
+    img: 'https://b2b.asmodee.es/product/image/small/bopj3aen_1.png',
+    desc: 'Set de lujo limitado por el 3er aniversario. Incluye Storage Box, Card Case, 70 fundas, tapete de juego, 3 cartas promo y dados especiales.'
+  },
+  { 
+    id: 6, name: 'One Piece TCG: Premium Cards Vol.5', category: 'ONE PIECE TCG', pvp: 24.99, condition: 'Nuevo/Sellado', 
+    img: 'https://b2b.asmodee.es/product/image/medium/bopbs05en_1.png',
+    desc: 'Selección de cartas premium con texturas de lujo. Contiene 12 cartas Holo + Textured Foil de los personajes más icónicos de One Piece.'
+  }
 ];
+
+const categories = ['TODOS', 'RIFTBOUND', 'ONE PIECE TCG', 'ACCESSORIES'];
 
 const bannerImages = [
   "/hero-riftbound.png",
@@ -24,13 +50,19 @@ export default function App() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isUserOpen, setIsUserOpen] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [activeCategory, setActiveCategory] = useState('TODOS');
   const [activeBanner, setActiveBanner] = useState(0);
 
-  // Filtrado de productos por búsqueda
+  // Filtrado de productos por búsqueda y categoría
   const filteredProducts = useMemo(() => {
-    return productos.filter(p => p.name.toLowerCase().includes(searchQuery.toLowerCase()));
-  }, [searchQuery]);
+    return productos.filter(p => {
+      const matchesSearch = p.name.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesCategory = activeCategory === 'TODOS' || p.category.toUpperCase().includes(activeCategory);
+      return matchesSearch && matchesCategory;
+    });
+  }, [searchQuery, activeCategory]);
 
   const addToCart = (product) => {
     setCart(prev => {
@@ -61,7 +93,37 @@ export default function App() {
   return (
     <div className="app-container">
       {/* OVERLAYS */}
-      {(isCartOpen || isMenuOpen || isUserOpen) && <div className="overlay" onClick={() => { setIsCartOpen(false); setIsMenuOpen(false); setIsUserOpen(false); }} />}
+      {(isCartOpen || isMenuOpen || isUserOpen || selectedProduct) && (
+        <div className="overlay" onClick={() => { 
+          setIsCartOpen(false); 
+          setIsMenuOpen(false); 
+          setIsUserOpen(false); 
+          setSelectedProduct(null); 
+        }} />
+      )}
+
+      {/* PRODUCT DETAIL MODAL */}
+      {selectedProduct && (
+        <div className="product-modal open">
+          <div className="modal-close" onClick={() => setSelectedProduct(null)}><X /></div>
+          <div className="modal-layout">
+            <div className="modal-img">
+              <img src={selectedProduct.img} alt={selectedProduct.name} />
+            </div>
+            <div className="modal-info">
+              <span className="product-cat">{selectedProduct.category}</span>
+              <h2>{selectedProduct.name}</h2>
+              <div className="modal-price">€{selectedProduct.pvp.toFixed(2)}</div>
+              <p className="modal-desc">{selectedProduct.desc}</p>
+              <div className="modal-actions">
+                <button className="btn-primary" style={{ flexGrow: 1 }} onClick={() => { addToCart(selectedProduct); setSelectedProduct(null); }}>
+                  Añadir al Carrito
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* SIDE MENU (Burger) */}
       <aside className={`sidebar-menu ${isMenuOpen ? 'open' : ''}`}>
@@ -139,28 +201,39 @@ export default function App() {
       {/* HEADER */}
       <header className="nav-header">
         <div className="header-left">
-          <Menu size={28} onClick={() => setIsMenuOpen(true)} className="icon-hover" />
+          <Menu size={28} onClick={() => setIsMenuOpen(true)} className="icon-hover" style={{ color: 'var(--text-main)' }} />
+          <div className="header-categories desktop-only">
+            {categories.map(cat => (
+              <span 
+                key={cat} 
+                className={`header-cat-link ${activeCategory === cat ? 'active' : ''}`}
+                onClick={() => setActiveCategory(cat)}
+              >
+                {cat}
+              </span>
+            ))}
+          </div>
         </div>
         
         <div className="header-center">
-          <img src="/logo-central.png" alt="Central TCG Logo" style={{ height: '100px', cursor: 'pointer' }} onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} />
+          <img src="/logo-central.png" alt="Central TCG Logo" className="header-logo-img" onClick={() => { setActiveCategory('TODOS'); window.scrollTo({ top: 0, behavior: 'smooth' }); }} />
         </div>
 
         <div className="header-right">
           <div className={`search-bar-inline ${isSearchOpen ? 'active' : ''}`}>
             <input 
               type="text" 
-              placeholder="Buscar..." 
+              placeholder="Buscar Riftbound, One Piece..." 
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
+              onFocus={() => setIsSearchOpen(true)}
               onBlur={() => !searchQuery && setIsSearchOpen(false)}
-              autoFocus
             />
           </div>
-          <Search size={24} onClick={() => setIsSearchOpen(!isSearchOpen)} className="icon-hover" />
-          <User size={24} onClick={() => setIsUserOpen(true)} className="icon-hover" />
+          <Search size={22} onClick={() => setIsSearchOpen(!isSearchOpen)} className="icon-hover" />
+          <User size={22} onClick={() => setIsUserOpen(true)} className="icon-hover" />
           <div className="cart-trigger" onClick={() => setIsCartOpen(true)}>
-            <ShoppingCart size={24} className="icon-hover" />
+            <ShoppingCart size={22} className="icon-hover" />
             {cartCount > 0 && <span className="cart-badge">{cartCount}</span>}
           </div>
         </div>
@@ -215,12 +288,12 @@ export default function App() {
       {/* MAIN CONTENT */}
       <main className="main-content">
         <div className="section-title">
-          <h2>NOVEDADES RIFTBOUND</h2>
+          <h2>{activeCategory === 'TODOS' ? 'NOVEDADES SELECCIONADAS' : activeCategory}</h2>
         </div>
 
         <section className="card-grid">
           {filteredProducts.map(p => (
-            <div className="product-card" key={p.id} onClick={() => alert(`Próximamente: Detalle de ${p.name}`)}>
+            <div className="product-card" key={p.id} onClick={() => setSelectedProduct(p)}>
               <div className="product-img-container">
                 <img src={p.img} alt={p.name} className="product-img-hover" />
               </div>
