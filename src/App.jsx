@@ -2,47 +2,47 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { ShoppingCart, Menu, Search, User, ChevronLeft, ChevronRight, X, Trash2, Plus, Minus } from 'lucide-react';
 import './index.css';
 
-// Datos reales de productos TCG con soporte para múltiples categorías y Naruto
+// Datos oficiales Naruto Ninja TCG (GRG) y TCG expansión
 const productos = [
   { 
     id: 1, name: 'Riftbound: Vendetta Vault', categories: ['RIFTBOUND', 'ACCESSORIES'], pvp: 34.99, condition: 'Nuevo/Sellado', 
     img: 'https://b2b.asmodee.es/product/image/medium/rb04vb01en_1.png',
-    desc: '¡Ábrete paso con el Vendetta Vault! Este pack incluye 6 sobres de Riftbound: Vendetta, 36 runas básicas para potenciar tus mazos y 3 fichas full-art de doble cara.'
+    desc: 'Pack que incluye 6 sobres de Riftbound: Vendetta, 36 runas básicas y 3 fichas full-art.'
   },
   { 
     id: 2, name: 'Riftbound: Unleashed Booster Display (24)', categories: ['RIFTBOUND', 'DISPLAYS'], pvp: 108.00, condition: 'Nuevo/Sellado', 
     img: 'https://b2b.asmodee.es/product/image/medium/rb03bd01den_1.png',
-    desc: 'Caja completa de 24 sobres de la expansión Unleashed. Expande tu mazo con poderosos hechizos y unidades del universo League of Legends.'
+    desc: 'Caja completa de 24 sobres de la expansión Unleashed.'
   },
   { 
     id: 3, name: 'Riftbound: Unleashed Art Sleeves (100)', categories: ['RIFTBOUND', 'ACCESSORIES'], pvp: 11.99, condition: 'Nuevo/Sellado', 
     img: 'https://b2b.asmodee.es/product/image/medium/rb03as01en_1.png',
-    desc: 'Fundas de alta calidad con arte exclusivo de la expansión Unleashed. Pack de 100 fundas con acabado mate para juego profesional.'
+    desc: 'Fundas premium con acabado mate y arte exclusivo de Unleashed.'
   },
   { 
     id: 4, name: 'One Piece TCG: Booster Display OP14 (24)', categories: ['ONE PIECE TCG', 'DISPLAYS'], pvp: 132.00, condition: 'Nuevo/Sellado', 
     img: 'https://b2b.asmodee.es/product/image/small/bopop14den_124183_0.png',
-    desc: 'Caja de 24 sobres de la colección OP14. Incluye cartas del 3er Aniversario y arte alternativo exclusivo.'
+    desc: 'Caja de 24 sobres de la colección OP14 con cartas del 3er Aniversario.'
   },
   { 
-    id: 5, name: 'One Piece TCG: 3rd Anniversary Set', categories: ['ONE PIECE TCG', 'ACCESSORIES', 'NOVEDADES'], pvp: 199.99, condition: 'Nuevo/Sellado', 
-    img: 'https://b2b.asmodee.es/product/image/small/bopj3aen_1.png',
-    desc: 'Set de lujo limitado. Incluye Storage Box, tapete de juego y cartas promo especiales por el aniversario.'
+    id: 5, name: 'Naruto Ninja TCG: Booster Display (24)', categories: ['NARUTO TCG', 'DISPLAYS'], pvp: 120.00, condition: 'Nuevo/Sellado', 
+    img: 'https://b2b.asmodee.es/product/image/large/ntcgbd01en_1.png',
+    desc: 'Caja de 24 sobres oficiales de la serie Konoha Shidō. Cada sobre incluye 10 cartas conレア y holos.'
   },
   { 
-    id: 6, name: 'Naruto Earth Scroll Edition Display (20)', categories: ['NARUTO TCG', 'DISPLAYS'], pvp: 54.95, condition: 'Nuevo/Sellado', 
-    img: 'https://b2b.asmodee.es/Content/Images/Products/KYNRTE02D.jpg',
-    desc: 'Display de 20 sobres de la edición Earth Scroll. Colecciona a los ninjas más poderosos de la aldea oculta de la hoja.'
+    id: 6, name: 'Naruto Ninja TCG: Special Pack Naruto/Sasuke', categories: ['NARUTO TCG', 'NOVEDADES'], pvp: 24.99, condition: 'Nuevo/Sellado', 
+    img: 'https://b2b.asmodee.es/product/image/large/ntcgsp01en_1.png',
+    desc: 'Pack premium con 4 sobres, 2 cartas Mythos exclusivas y una carta MAXI de coleccionista.'
   },
   { 
-    id: 7, name: 'Naruto Heaven Scroll Edition Display (12)', categories: ['NARUTO TCG', 'DISPLAYS'], pvp: 32.95, condition: 'Nuevo/Sellado', 
-    img: 'https://b2b.asmodee.es/Content/Images/Products/KYNRTH02D.jpg',
-    desc: 'Edición compacta Heaven Scroll con 12 sobres. Una forma perfecta de empezar tu colección de cartas Kayou.'
+    id: 7, name: 'Naruto Ninja TCG: Special Pack Itachi/Kisame', categories: ['NARUTO TCG', 'NOVEDADES'], pvp: 24.99, condition: 'Nuevo/Sellado', 
+    img: 'https://b2b.asmodee.es/product/image/large/ntcgsp02en_1.png',
+    desc: 'Versión del Special Pack centrada en los legendarios Itachi y Kisame. Incluye material exclusivo.'
   },
   { 
-    id: 8, name: 'Naruto Special Pack: Naruto vs Sasuke', categories: ['NARUTO TCG', 'NOVEDADES'], pvp: 12.99, condition: 'Nuevo/Sellado', 
-    img: 'https://b2b.asmodee.es/Content/Images/Products/KYNRTM01E.jpg',
-    desc: 'Pack especial que celebra la rivalidad legendaria entre Naruto y Sasuke con cartas exclusivas.'
+    id: 8, name: 'Naruto Ninja TCG: Collector Binder', categories: ['NARUTO TCG', 'ACCESSORIES'], pvp: 9.99, condition: 'Nuevo/Sellado', 
+    img: 'https://b2b.asmodee.es/product/image/large/ntcgbin01en_1.png',
+    desc: 'Archivador oficial de 9 bolsillos (capacidad 180 cartas) para proteger tu colección Konoha Shidō.'
   }
 ];
 
@@ -258,7 +258,7 @@ export default function App() {
                 className={`header-cat-link ${activeCategory === cat ? 'active' : ''}`}
                 onClick={() => {
                   setActiveCategory(cat);
-                  if (window.scrollY < 400) window.scrollTo({ top: 800, behavior: 'smooth' });
+                  if (window.scrollY < 400) window.scrollTo({ top: 460, behavior: 'smooth' });
                 }}
               >
                 {cat}
