@@ -1,7 +1,8 @@
-const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+import Stripe from 'stripe';
 
-module.exports = async (req, res) => {
-  // Solo aceptamos peticiones POST
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+
+export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
@@ -9,7 +10,6 @@ module.exports = async (req, res) => {
   try {
     const { items } = req.body;
 
-    // Formatear los productos para Stripe
     const lineItems = items.map(item => ({
       price_data: {
         currency: 'eur',
@@ -17,7 +17,7 @@ module.exports = async (req, res) => {
           name: item.name,
           images: [item.img],
         },
-        unit_amount: Math.round(item.pvp * 100), // Stripe usa céntimos
+        unit_amount: Math.round(item.pvp * 100),
       },
       quantity: item.qty,
     }));
@@ -35,4 +35,4 @@ module.exports = async (req, res) => {
     console.error('Error creating Stripe session:', error);
     res.status(500).json({ error: error.message });
   }
-};
+}
