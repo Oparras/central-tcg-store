@@ -26,11 +26,11 @@ export default async function handler(req, res) {
       payment_method_types: ['card'],
       line_items: lineItems,
       mode: 'payment',
-      success_url: `${req.headers.origin}/?success=true`,
-      cancel_url: `${req.headers.origin}/?canceled=true`,
+      success_url: 'https://centraltcg.es/?success=true',
+      cancel_url: 'https://centraltcg.es/?canceled=true',
     });
 
-    res.status(200).json({ id: session.id });
+    res.status(200).json({ id: session.id, url: session.url });
   } catch (error) {
     console.error('Error creating Stripe session:', error);
     res.status(500).json({ error: error.message });
