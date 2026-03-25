@@ -1,7 +1,7 @@
 import { loadStripe } from '@stripe/stripe-js';
 
 // Clave Pública LIVE de Stripe (Central TCG)
-const stripePromise = loadStripe('pk_live_51TEu7B9T2prQMYzAEd3cMyU7BSpCj8U4erbeHG3hQzoJ0lJyW6A9n08vD6ztClzPb6WxkIDPCCDVrKLU5tFxSeES00w18jJYYf');
+const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || 'pk_live_51TEu7B9T2prQMYzAEd3cMyU7BSpCj8U4erbeHG3hQzoJ0lJyW6A9n08vD6ztClzPb6WxkIDPCCDVrKLU5tFxSeES00w18jJYYf');
 
 export const handleCheckout = async (cartItems) => {
   try {
