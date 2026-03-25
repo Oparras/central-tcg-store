@@ -1,5 +1,6 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { ShoppingCart, Menu, Search, User, ChevronLeft, ChevronRight, X, Trash2, Plus, Minus } from 'lucide-react';
+import { ShoppingCart, Menu, Search, User, ChevronLeft, ChevronRight, X, Trash2, Plus, Minus, CreditCard } from 'lucide-react';
+import { handleCheckout } from './stripe';
 import './index.css';
 
 // Datos oficiales Naruto Ninja TCG (GRG) y TCG expansión
@@ -70,6 +71,14 @@ export default function App() {
     const consent = localStorage.getItem('cookie-consent');
     if (!consent) {
       setTimeout(() => setIsCookieVisible(true), 1500);
+    }
+
+    // Comprobar parámetros de Stripe
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('success')) {
+      alert('¡Gracias por tu compra! Tu pedido en Central TCG ha sido procesado correctamente.');
+    } else if (params.get('canceled')) {
+      alert('El pago ha sido cancelado. Vuelve a intentarlo cuando quieras.');
     }
   }, []);
 
@@ -201,7 +210,12 @@ export default function App() {
               <span>TOTAL</span>
               <span>€{cartTotal.toFixed(2)}</span>
             </div>
-            <button className="btn-primary" style={{ width: '100%', marginTop: '1rem' }} onClick={() => alert('Pasarela de pago conectando...')}>
+            <button 
+              className="btn-primary" 
+              style={{ width: '100%', marginTop: '1rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.8rem' }} 
+              onClick={() => handleCheckout(cart)}
+            >
+              <CreditCard size={18} />
               FINALIZAR COMPRA
             </button>
           </div>
