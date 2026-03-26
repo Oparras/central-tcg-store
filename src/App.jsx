@@ -294,9 +294,6 @@ export default function App() {
 
   const onCheckout = async () => {
     sessionStorage.setItem('last-order', JSON.stringify(cart));
-    if (user) {
-      await supabase.from('orders').insert({ user_id: user.id, items: cart, total: cartTotal });
-    }
     handleCheckout(cart);
   };
 
