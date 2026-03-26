@@ -681,7 +681,9 @@ export default function App() {
               Central TCG
             </h3>
             <p>centraltcgshop@gmail.com</p>
-            <p>Madrid, España</p>
+            <p></p>
+            <p></p>
+            <p>Central TCG - Tienda online de TCG en España</p>
           </div>
 
           {/* COLUMNA 2 */}
