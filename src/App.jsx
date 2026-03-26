@@ -658,11 +658,39 @@ export default function App() {
       </main>
 
       {/* FOOTER */}
-      <footer className="main-footer">
-        <div className="footer-content">
-          <div className="footer-logo">CENTRAL TCG</div>
-          <p>© 2026 Central TCG España.</p>
-          <div className="social-links"><span>Instagram</span> • <span>Twitter</span> • <span>Discord</span></div>
+      <footer style={{
+        background: "#111",
+        color: "#fff",
+        padding: "40px 20px",
+        marginTop: "50px"
+      }}>
+        <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
+
+          <h2>Central TCG</h2>
+
+          <p>Email: centraltcg@gmail.com</p>
+          <p>Ubicación: Madrid, España</p>
+
+          <hr style={{ margin: "20px 0", opacity: 0.3 }} />
+
+          <h4>Envíos</h4>
+          <p>Envíos en 24-72h en España.</p>
+
+          <h4>Devoluciones</h4>
+          <p>14 días para devoluciones.</p>
+
+          <hr style={{ margin: "20px 0", opacity: 0.3 }} />
+
+          <h4>Legal</h4>
+          <p>Aviso legal</p>
+          <p>Política de privacidad</p>
+          <p>Cookies</p>
+
+          <hr style={{ margin: "20px 0", opacity: 0.3 }} />
+
+          <p style={{ fontSize: "12px", opacity: 0.6 }}>
+            © {new Date().getFullYear()} Central TCG
+          </p>
         </div>
       </footer>
     </div>
