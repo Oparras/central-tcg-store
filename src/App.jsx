@@ -680,7 +680,7 @@ export default function App() {
             <h3 style={{ color: "#fff", marginBottom: "10px" }}>
               Central TCG
             </h3>
-            <p>centraltcg@gmail.com</p>
+            <p>centraltcgshop@gmail.com</p>
             <p>Madrid, España</p>
           </div>
 
