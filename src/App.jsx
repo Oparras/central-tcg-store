@@ -658,39 +658,62 @@ export default function App() {
       </main>
 
       {/* FOOTER */}
-      <footer style={{
-        background: "#111",
-        color: "#fff",
-        padding: "40px 20px",
-        marginTop: "50px"
-      }}>
-        <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
+      <footer
+        style={{
+          background: "#0a0a0a",
+          color: "#aaa",
+          padding: "30px 40px",
+          marginTop: "60px",
+          fontSize: "14px",
+        }}
+      >
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "flex-start",
+            gap: "80px",
+            maxWidth: "1200px",
+          }}
+        >
+          {/* COLUMNA 1 */}
+          <div>
+            <h3 style={{ color: "#fff", marginBottom: "10px" }}>
+              Central TCG
+            </h3>
+            <p>centraltcg@gmail.com</p>
+            <p>Madrid, España</p>
+          </div>
 
-          <h2>Central TCG</h2>
+          {/* COLUMNA 2 */}
+          <div>
+            <h4 style={{ color: "#ddd", marginBottom: "10px" }}>
+              Información
+            </h4>
+            <p>Envíos 24-72h</p>
+            <p>Devoluciones 14 días</p>
+          </div>
 
-          <p>Email: centraltcg@gmail.com</p>
-          <p>Ubicación: Madrid, España</p>
+          {/* COLUMNA 3 */}
+          <div>
+            <h4 style={{ color: "#ddd", marginBottom: "10px" }}>
+              Legal
+            </h4>
+            <p style={{ cursor: "pointer" }}>Aviso legal</p>
+            <p style={{ cursor: "pointer" }}>Privacidad</p>
+            <p style={{ cursor: "pointer" }}>Cookies</p>
+          </div>
+        </div>
 
-          <hr style={{ margin: "20px 0", opacity: 0.3 }} />
-
-          <h4>Envíos</h4>
-          <p>Envíos en 24-72h en España.</p>
-
-          <h4>Devoluciones</h4>
-          <p>14 días para devoluciones.</p>
-
-          <hr style={{ margin: "20px 0", opacity: 0.3 }} />
-
-          <h4>Legal</h4>
-          <p>Aviso legal</p>
-          <p>Política de privacidad</p>
-          <p>Cookies</p>
-
-          <hr style={{ margin: "20px 0", opacity: 0.3 }} />
-
-          <p style={{ fontSize: "12px", opacity: 0.6 }}>
-            © {new Date().getFullYear()} Central TCG
-          </p>
+        <div
+          style={{
+            marginTop: "30px",
+            borderTop: "1px solid #222",
+            paddingTop: "15px",
+            fontSize: "12px",
+            color: "#666",
+          }}
+        >
+          © {new Date().getFullYear()} Central TCG
         </div>
       </footer>
     </div>
