@@ -166,18 +166,39 @@ function ThankYouPage({ onBack, sessionId }) {
 function AdminPanel({ onClose }) {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [orders, setOrders] = useState([]);
+  const [adminView, setAdminView] = useState('products'); // 'products' | 'orders'
+  const [expandedOrder, setExpandedOrder] = useState(null);
   const [editingProduct, setEditingProduct] = useState(null);
   const [isAdding, setIsAdding] = useState(false);
   const emptyForm = { name: '', description: '', pvp: '', img: '', categories: [], condition: 'Nuevo/Sellado', active: true };
   const [form, setForm] = useState(emptyForm);
 
-  useEffect(() => { loadProducts(); }, []);
+  useEffect(() => {
+    loadProducts();
+    loadOrders();
+  }, []);
 
   const loadProducts = async () => {
     setLoading(true);
     const { data } = await supabase.from('products').select('*').order('created_at', { ascending: false });
     setProducts(data || []);
     setLoading(false);
+  };
+
+  const loadOrders = async () => {
+    const { data, error } = await supabase
+      .from('orders')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.error('Error cargando pedidos:', error);
+      setOrders([]);
+      return;
+    }
+
+    setOrders(data || []);
   };
 
   const saveProduct = async () => {
@@ -241,101 +262,302 @@ function AdminPanel({ onClose }) {
       </div>
 
       <div style={{ padding: '2rem', maxWidth: '1000px', margin: '0 auto' }}>
+        <div style={{ display: 'flex', gap: '0.75rem', marginBottom: '1.5rem' }}>
+          <button
+            onClick={() => setAdminView('products')}
+            style={{
+              padding: '0.6rem 1rem',
+              borderRadius: '8px',
+              border: '1px solid',
+              borderColor: adminView === 'products' ? 'var(--accent-primary, #e8d5a3)' : '#333',
+              background: adminView === 'products' ? 'var(--accent-primary, #e8d5a3)' : 'transparent',
+              color: adminView === 'products' ? '#000' : '#888',
+              fontWeight: 800,
+              fontSize: '0.8rem',
+              cursor: 'pointer'
+            }}
+          >
+            PRODUCTOS
+          </button>
 
-        {/* FORMULARIO AÑADIR/EDITAR */}
-        {isAdding && (
-          <div style={{ background: '#111', border: '1px solid #222', borderRadius: '12px', padding: '1.5rem', marginBottom: '2rem' }}>
-            <h3 style={{ fontWeight: 800, fontSize: '0.9rem', letterSpacing: '0.08em', marginBottom: '1.25rem', color: '#888' }}>
-              {editingProduct ? '✏️ EDITAR PRODUCTO' : '➕ NUEVO PRODUCTO'}
-            </h3>
+          <button
+            onClick={() => setAdminView('orders')}
+            style={{
+              padding: '0.6rem 1rem',
+              borderRadius: '8px',
+              border: '1px solid',
+              borderColor: adminView === 'orders' ? 'var(--accent-primary, #e8d5a3)' : '#333',
+              background: adminView === 'orders' ? 'var(--accent-primary, #e8d5a3)' : 'transparent',
+              color: adminView === 'orders' ? '#000' : '#888',
+              fontWeight: 800,
+              fontSize: '0.8rem',
+              cursor: 'pointer'
+            }}
+          >
+            PEDIDOS
+          </button>
+        </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0 1rem' }}>
-              <div style={{ gridColumn: '1 / -1' }}>
-                <label style={{ fontSize: '0.75rem', color: '#666', display: 'block', marginBottom: '0.3rem' }}>NOMBRE</label>
-                <input style={inputStyle} value={form.name} onChange={e => setForm(p => ({ ...p, name: e.target.value }))} placeholder="Nombre del producto" />
+        {adminView === 'products' && (
+          <>
+            {/* FORMULARIO AÑADIR/EDITAR */}
+            {isAdding && (
+              <div style={{ background: '#111', border: '1px solid #222', borderRadius: '12px', padding: '1.5rem', marginBottom: '2rem' }}>
+                <h3 style={{ fontWeight: 800, fontSize: '0.9rem', letterSpacing: '0.08em', marginBottom: '1.25rem', color: '#888' }}>
+                  {editingProduct ? '✏️ EDITAR PRODUCTO' : '➕ NUEVO PRODUCTO'}
+                </h3>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0 1rem' }}>
+                  <div style={{ gridColumn: '1 / -1' }}>
+                    <label style={{ fontSize: '0.75rem', color: '#666', display: 'block', marginBottom: '0.3rem' }}>NOMBRE</label>
+                    <input style={inputStyle} value={form.name} onChange={e => setForm(p => ({ ...p, name: e.target.value }))} placeholder="Nombre del producto" />
+                  </div>
+                  <div style={{ gridColumn: '1 / -1' }}>
+                    <label style={{ fontSize: '0.75rem', color: '#666', display: 'block', marginBottom: '0.3rem' }}>DESCRIPCIÓN</label>
+                    <textarea style={{ ...inputStyle, height: '80px', resize: 'vertical' }} value={form.description} onChange={e => setForm(p => ({ ...p, description: e.target.value }))} placeholder="Descripción del producto" />
+                  </div>
+                  <div>
+                    <label style={{ fontSize: '0.75rem', color: '#666', display: 'block', marginBottom: '0.3rem' }}>PRECIO (€)</label>
+                    <input style={inputStyle} type="number" step="0.01" value={form.pvp} onChange={e => setForm(p => ({ ...p, pvp: e.target.value }))} placeholder="0.00" />
+                  </div>
+                  <div>
+                    <label style={{ fontSize: '0.75rem', color: '#666', display: 'block', marginBottom: '0.3rem' }}>CONDICIÓN</label>
+                    <select style={{ ...inputStyle, marginBottom: 0 }} value={form.condition} onChange={e => setForm(p => ({ ...p, condition: e.target.value }))}>
+                      <option value="Nuevo/Sellado">Nuevo/Sellado</option>
+                      <option value="Usado">Usado</option>
+                      <option value="Dañado">Dañado</option>
+                    </select>
+                  </div>
+                  <div style={{ gridColumn: '1 / -1' }}>
+                    <label style={{ fontSize: '0.75rem', color: '#666', display: 'block', marginBottom: '0.3rem' }}>URL DE IMAGEN</label>
+                    <input style={inputStyle} value={form.img} onChange={e => setForm(p => ({ ...p, img: e.target.value }))} placeholder="https://..." />
+                    {form.img && <img src={form.img} alt="preview" style={{ width: '80px', height: '80px', objectFit: 'contain', borderRadius: '6px', background: '#1a1a1a', marginBottom: '0.75rem' }} />}
+                  </div>
+                </div>
+
+                <label style={{ fontSize: '0.75rem', color: '#666', display: 'block', marginBottom: '0.5rem' }}>CATEGORÍAS</label>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '1.25rem' }}>
+                  {categoriesData.filter(c => c !== 'TODOS').map(cat => (
+                    <button key={cat} onClick={() => toggleCategory(cat)}
+                      style={{ padding: '0.35rem 0.85rem', borderRadius: '20px', border: '1px solid', fontSize: '0.75rem', fontWeight: 700, cursor: 'pointer', background: form.categories.includes(cat) ? 'var(--accent-primary, #e8d5a3)' : 'transparent', color: form.categories.includes(cat) ? '#000' : '#666', borderColor: form.categories.includes(cat) ? 'var(--accent-primary, #e8d5a3)' : '#333' }}>
+                      {cat}
+                    </button>
+                  ))}
+                </div>
+
+                <div style={{ display: 'flex', gap: '0.75rem' }}>
+                  <button onClick={saveProduct} style={{ padding: '0.75rem 1.5rem', background: 'var(--accent-primary, #e8d5a3)', color: '#000', border: 'none', borderRadius: '6px', fontWeight: 800, fontSize: '0.85rem', cursor: 'pointer' }}>
+                    {editingProduct ? 'GUARDAR CAMBIOS' : 'AÑADIR PRODUCTO'}
+                  </button>
+                  <button onClick={() => { setIsAdding(false); setEditingProduct(null); setForm(emptyForm); }}
+                    style={{ padding: '0.75rem 1.5rem', background: 'none', border: '1px solid #333', borderRadius: '6px', color: '#888', fontSize: '0.85rem', cursor: 'pointer' }}>
+                    CANCELAR
+                  </button>
+                </div>
               </div>
-              <div style={{ gridColumn: '1 / -1' }}>
-                <label style={{ fontSize: '0.75rem', color: '#666', display: 'block', marginBottom: '0.3rem' }}>DESCRIPCIÓN</label>
-                <textarea style={{ ...inputStyle, height: '80px', resize: 'vertical' }} value={form.description} onChange={e => setForm(p => ({ ...p, description: e.target.value }))} placeholder="Descripción del producto" />
-              </div>
-              <div>
-                <label style={{ fontSize: '0.75rem', color: '#666', display: 'block', marginBottom: '0.3rem' }}>PRECIO (€)</label>
-                <input style={inputStyle} type="number" step="0.01" value={form.pvp} onChange={e => setForm(p => ({ ...p, pvp: e.target.value }))} placeholder="0.00" />
-              </div>
-              <div>
-                <label style={{ fontSize: '0.75rem', color: '#666', display: 'block', marginBottom: '0.3rem' }}>CONDICIÓN</label>
-                <select style={{ ...inputStyle, marginBottom: 0 }} value={form.condition} onChange={e => setForm(p => ({ ...p, condition: e.target.value }))}>
-                  <option value="Nuevo/Sellado">Nuevo/Sellado</option>
-                  <option value="Usado">Usado</option>
-                  <option value="Dañado">Dañado</option>
-                </select>
-              </div>
-              <div style={{ gridColumn: '1 / -1' }}>
-                <label style={{ fontSize: '0.75rem', color: '#666', display: 'block', marginBottom: '0.3rem' }}>URL DE IMAGEN</label>
-                <input style={inputStyle} value={form.img} onChange={e => setForm(p => ({ ...p, img: e.target.value }))} placeholder="https://..." />
-                {form.img && <img src={form.img} alt="preview" style={{ width: '80px', height: '80px', objectFit: 'contain', borderRadius: '6px', background: '#1a1a1a', marginBottom: '0.75rem' }} />}
-              </div>
+            )}
+
+            {/* LISTA DE PRODUCTOS */}
+            <div style={{ fontSize: '0.75rem', color: '#666', letterSpacing: '0.1em', marginBottom: '1rem' }}>
+              {products.length} PRODUCTOS EN TOTAL
             </div>
 
-            <label style={{ fontSize: '0.75rem', color: '#666', display: 'block', marginBottom: '0.5rem' }}>CATEGORÍAS</label>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '1.25rem' }}>
-              {categoriesData.filter(c => c !== 'TODOS').map(cat => (
-                <button key={cat} onClick={() => toggleCategory(cat)}
-                  style={{ padding: '0.35rem 0.85rem', borderRadius: '20px', border: '1px solid', fontSize: '0.75rem', fontWeight: 700, cursor: 'pointer', background: form.categories.includes(cat) ? 'var(--accent-primary, #e8d5a3)' : 'transparent', color: form.categories.includes(cat) ? '#000' : '#666', borderColor: form.categories.includes(cat) ? 'var(--accent-primary, #e8d5a3)' : '#333' }}>
-                  {cat}
-                </button>
-              ))}
+            {loading ? (
+              <p style={{ color: '#555', textAlign: 'center', padding: '3rem' }}>Cargando productos...</p>
+            ) : (
+              products.map(product => (
+                <div key={product.id} style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '1rem', background: '#111', border: `1px solid ${product.active ? '#222' : '#1a1a1a'}`, borderRadius: '10px', marginBottom: '0.75rem', opacity: product.active ? 1 : 0.5 }}>
+                  <img src={product.img} alt={product.name} style={{ width: '56px', height: '56px', objectFit: 'contain', borderRadius: '6px', background: '#1a1a1a', flexShrink: 0 }} />
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <p style={{ fontWeight: 700, fontSize: '0.9rem', marginBottom: '0.2rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{product.name}</p>
+                    <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                      {(product.categories || []).map(cat => (
+                        <span key={cat} style={{ fontSize: '0.68rem', padding: '0.15rem 0.5rem', background: '#1a1a1a', borderRadius: '10px', color: '#888' }}>{cat}</span>
+                      ))}
+                    </div>
+                  </div>
+                  <span style={{ fontWeight: 800, fontSize: '1rem', color: 'var(--accent-primary, #e8d5a3)', flexShrink: 0 }}>€{Number(product.pvp).toFixed(2)}</span>
+                  <div style={{ display: 'flex', gap: '0.5rem', flexShrink: 0 }}>
+                    <button onClick={() => startEdit(product)} title="Editar"
+                      style={{ background: 'none', border: '1px solid #333', borderRadius: '6px', padding: '0.4rem 0.6rem', cursor: 'pointer', color: '#888', display: 'flex', alignItems: 'center' }}>
+                      <Edit2 size={14} />
+                    </button>
+                    <button onClick={() => toggleActive(product)} title={product.active ? 'Desactivar' : 'Activar'}
+                      style={{ background: 'none', border: '1px solid #333', borderRadius: '6px', padding: '0.4rem 0.6rem', cursor: 'pointer', color: product.active ? '#22c55e' : '#555', display: 'flex', alignItems: 'center' }}>
+                      {product.active ? <ToggleRight size={16} /> : <ToggleLeft size={16} />}
+                    </button>
+                    <button onClick={() => deleteProduct(product.id)} title="Eliminar"
+                      style={{ background: 'none', border: '1px solid #333', borderRadius: '6px', padding: '0.4rem 0.6rem', cursor: 'pointer', color: '#ef4444', display: 'flex', alignItems: 'center' }}>
+                      <Trash2 size={14} />
+                    </button>
+                  </div>
+                </div>
+              ))
+
+            )}
+          </>
+        )}
+        {adminView === 'orders' && (
+          <div>
+            <div style={{ fontSize: '0.75rem', color: '#666', letterSpacing: '0.1em', marginBottom: '1rem' }}>
+              {orders.length} PEDIDOS EN TOTAL
             </div>
 
-            <div style={{ display: 'flex', gap: '0.75rem' }}>
-              <button onClick={saveProduct} style={{ padding: '0.75rem 1.5rem', background: 'var(--accent-primary, #e8d5a3)', color: '#000', border: 'none', borderRadius: '6px', fontWeight: 800, fontSize: '0.85rem', cursor: 'pointer' }}>
-                {editingProduct ? 'GUARDAR CAMBIOS' : 'AÑADIR PRODUCTO'}
-              </button>
-              <button onClick={() => { setIsAdding(false); setEditingProduct(null); setForm(emptyForm); }}
-                style={{ padding: '0.75rem 1.5rem', background: 'none', border: '1px solid #333', borderRadius: '6px', color: '#888', fontSize: '0.85rem', cursor: 'pointer' }}>
-                CANCELAR
-              </button>
-            </div>
+            {orders.length === 0 ? (
+              <p style={{ color: '#555', textAlign: 'center', padding: '3rem' }}>
+                No hay pedidos todavía.
+              </p>
+            ) : (
+              orders.map(order => (
+                <div
+                  key={order.id}
+                  style={{
+                    background: '#111',
+                    border: '1px solid #222',
+                    borderRadius: '12px',
+                    marginBottom: '1rem',
+                    overflow: 'hidden'
+                  }}
+                >
+                  <div
+                    onClick={() =>
+                      setExpandedOrder(expandedOrder === order.id ? null : order.id)
+                    }
+                    style={{
+                      padding: '1rem 1.25rem',
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      cursor: 'pointer',
+                      background: 'rgba(255,255,255,0.02)'
+                    }}
+                  >
+                    <div>
+                      <div style={{ fontWeight: 800, fontSize: '0.9rem', marginBottom: '0.2rem' }}>
+                        {order.full_name || 'Cliente sin nombre'}
+                      </div>
+                      <div style={{ fontSize: '0.78rem', color: '#666' }}>
+                        {new Date(order.created_at).toLocaleString('es-ES')}
+                      </div>
+                    </div>
+
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                      <div style={{ textAlign: 'right' }}>
+                        <div style={{ fontSize: '0.78rem', color: '#666' }}>TOTAL</div>
+                        <div style={{ fontWeight: 800, color: 'var(--accent-primary, #e8d5a3)' }}>
+                          €{Number(order.total || 0).toFixed(2)}
+                        </div>
+                      </div>
+                      {expandedOrder === order.id ? <ChevronUp size={18} color="#666" /> : <ChevronDown size={18} color="#666" />}
+                    </div>
+                  </div>
+
+                  {expandedOrder === order.id && (
+                    <div style={{ padding: '1rem 1.25rem', borderTop: '1px solid #1a1a1a' }}>
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
+                        <div>
+                          <div style={{ fontSize: '0.72rem', color: '#666', marginBottom: '0.4rem', letterSpacing: '0.08em' }}>
+                            CLIENTE
+                          </div>
+                          <div style={{ fontSize: '0.88rem', marginBottom: '0.25rem' }}>
+                            <strong>Nombre:</strong> {order.full_name || '-'}
+                          </div>
+                          <div style={{ fontSize: '0.88rem', marginBottom: '0.25rem' }}>
+                            <strong>Email:</strong> {order.email || '-'}
+                          </div>
+                          <div style={{ fontSize: '0.88rem' }}>
+                            <strong>Teléfono:</strong> {order.phone || '-'}
+                          </div>
+                        </div>
+
+                        <div>
+                          <div style={{ fontSize: '0.72rem', color: '#666', marginBottom: '0.4rem', letterSpacing: '0.08em' }}>
+                            ENVÍO
+                          </div>
+                          <div style={{ fontSize: '0.88rem', lineHeight: '1.6' }}>
+                            <div><strong>Destinatario:</strong> {order.shipping_name || order.full_name || '-'}</div>
+                            <div>{order.shipping_line1 || '-'}</div>
+                            {order.shipping_line2 && <div>{order.shipping_line2}</div>}
+                            <div>
+                              {order.shipping_postal_code || ''} {order.shipping_city || ''}
+                            </div>
+                            <div>
+                              {order.shipping_state || ''} {order.shipping_country || ''}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div style={{ marginBottom: '1rem' }}>
+                        <div style={{ fontSize: '0.72rem', color: '#666', marginBottom: '0.5rem', letterSpacing: '0.08em' }}>
+                          PRODUCTOS
+                        </div>
+
+                        {(order.items || []).map((item, i) => (
+                          <div
+                            key={i}
+                            style={{
+                              display: 'flex',
+                              justifyContent: 'space-between',
+                              alignItems: 'center',
+                              padding: '0.6rem 0',
+                              borderBottom: '1px solid #1a1a1a'
+                            }}
+                          >
+                            <div>
+                              <div style={{ fontSize: '0.88rem', fontWeight: 600 }}>
+                                {item.name}
+                              </div>
+                              <div style={{ fontSize: '0.76rem', color: '#666' }}>
+                                Cantidad: {item.qty}
+                              </div>
+                            </div>
+
+                            <div style={{ fontSize: '0.88rem', fontWeight: 700 }}>
+                              €{(Number(item.pvp || 0) * Number(item.qty || 1)).toFixed(2)}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+
+                      <div
+                        style={{
+                          marginTop: '1rem',
+                          paddingTop: '1rem',
+                          borderTop: '1px solid #222',
+                          display: 'flex',
+                          justifyContent: 'flex-end'
+                        }}
+                      >
+                        <div style={{ minWidth: '240px' }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.4rem', color: '#888' }}>
+                            <span>Subtotal</span>
+                            <span>€{Number(order.subtotal || 0).toFixed(2)}</span>
+                          </div>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.4rem', color: '#888' }}>
+                            <span>Envío</span>
+                            <span>
+                              {Number(order.shipping_amount || 0) === 0
+                                ? 'Gratis'
+                                : `€${Number(order.shipping_amount || 0).toFixed(2)}`}
+                            </span>
+                          </div>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 800, color: '#fff' }}>
+                            <span>Total</span>
+                            <span style={{ color: 'var(--accent-primary, #e8d5a3)' }}>
+                              €{Number(order.total || 0).toFixed(2)}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ))
+            )}
           </div>
         )}
 
-        {/* LISTA DE PRODUCTOS */}
-        <div style={{ fontSize: '0.75rem', color: '#666', letterSpacing: '0.1em', marginBottom: '1rem' }}>
-          {products.length} PRODUCTOS EN TOTAL
-        </div>
-
-        {loading ? (
-          <p style={{ color: '#555', textAlign: 'center', padding: '3rem' }}>Cargando productos...</p>
-        ) : (
-          products.map(product => (
-            <div key={product.id} style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '1rem', background: '#111', border: `1px solid ${product.active ? '#222' : '#1a1a1a'}`, borderRadius: '10px', marginBottom: '0.75rem', opacity: product.active ? 1 : 0.5 }}>
-              <img src={product.img} alt={product.name} style={{ width: '56px', height: '56px', objectFit: 'contain', borderRadius: '6px', background: '#1a1a1a', flexShrink: 0 }} />
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <p style={{ fontWeight: 700, fontSize: '0.9rem', marginBottom: '0.2rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{product.name}</p>
-                <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-                  {(product.categories || []).map(cat => (
-                    <span key={cat} style={{ fontSize: '0.68rem', padding: '0.15rem 0.5rem', background: '#1a1a1a', borderRadius: '10px', color: '#888' }}>{cat}</span>
-                  ))}
-                </div>
-              </div>
-              <span style={{ fontWeight: 800, fontSize: '1rem', color: 'var(--accent-primary, #e8d5a3)', flexShrink: 0 }}>€{Number(product.pvp).toFixed(2)}</span>
-              <div style={{ display: 'flex', gap: '0.5rem', flexShrink: 0 }}>
-                <button onClick={() => startEdit(product)} title="Editar"
-                  style={{ background: 'none', border: '1px solid #333', borderRadius: '6px', padding: '0.4rem 0.6rem', cursor: 'pointer', color: '#888', display: 'flex', alignItems: 'center' }}>
-                  <Edit2 size={14} />
-                </button>
-                <button onClick={() => toggleActive(product)} title={product.active ? 'Desactivar' : 'Activar'}
-                  style={{ background: 'none', border: '1px solid #333', borderRadius: '6px', padding: '0.4rem 0.6rem', cursor: 'pointer', color: product.active ? '#22c55e' : '#555', display: 'flex', alignItems: 'center' }}>
-                  {product.active ? <ToggleRight size={16} /> : <ToggleLeft size={16} />}
-                </button>
-                <button onClick={() => deleteProduct(product.id)} title="Eliminar"
-                  style={{ background: 'none', border: '1px solid #333', borderRadius: '6px', padding: '0.4rem 0.6rem', cursor: 'pointer', color: '#ef4444', display: 'flex', alignItems: 'center' }}>
-                  <Trash2 size={14} />
-                </button>
-              </div>
-            </div>
-          ))
-        )}
       </div>
     </div>
   );
