@@ -2,36 +2,45 @@ import Stripe from 'stripe';
 import { createClient } from '@supabase/supabase-js';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+
 const supabase = createClient(
     process.env.VITE_SUPABASE_URL,
     process.env.SUPABASE_SERVICE_ROLE_KEY
 );
 
-export const config = { api: { bodyParser: false } };
+export const config = {
+    api: {
+        bodyParser: false,
+    },
+};
 
 async function getRawBody(req) {
     return new Promise((resolve, reject) => {
         const chunks = [];
-        req.on('data', chunk => chunks.push(chunk));
+        req.on('data', (chunk) => chunks.push(chunk));
         req.on('end', () => resolve(Buffer.concat(chunks)));
         req.on('error', reject);
     });
 }
 
 export default async function handler(req, res) {
-    if (req.method !== 'POST') return res.status(405).end();
-
-    const rawBody = await getRawBody(req);
-    const sig = req.headers['stripe-signature'];
+    if (req.method !== 'POST') {
+        return res.status(405).end();
+    }
 
     let event;
+
     try {
+        const rawBody = await getRawBody(req);
+        const sig = req.headers['stripe-signature'];
+
         event = stripe.webhooks.constructEvent(
             rawBody,
             sig,
             process.env.STRIPE_WEBHOOK_SECRET
         );
     } catch (err) {
+        console.error('Webhook signature error:', err.message);
         return res.status(400).json({ error: `Webhook error: ${err.message}` });
     }
 
@@ -74,8 +83,10 @@ export default async function handler(req, res) {
 
         if (error) {
             console.error('SUPABASE ORDER ERROR:', error);
+        } else {
+            console.log('✅ Pedido guardado en Supabase');
         }
     }
 
-    res.status(200).json({ received: true });
+    return res.status(200).json({ received: true });
 }
