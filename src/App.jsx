@@ -5,7 +5,7 @@ import { handleCheckout } from './stripe';
 import './index.css';
 
 
-const [successSessionId, setSuccessSessionId] = useState(null);
+
 // ─── SUPABASE ─────────────────────────────────────────────────────────────────
 const supabase = createClient(
   import.meta.env.VITE_SUPABASE_URL,
@@ -510,6 +510,7 @@ export default function App() {
   const [page, setPage] = useState('shop');
   const [user, setUser] = useState(null);
   const [showAdmin, setShowAdmin] = useState(false);
+  const [successSessionId, setSuccessSessionId] = useState(null);
 
   const isAdmin = user?.email === ADMIN_EMAIL;
 
