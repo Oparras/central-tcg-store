@@ -20,7 +20,10 @@ export default async function handler(req, res) {
             amount_subtotal: session.amount_subtotal,
             currency: session.currency,
             customer_details: session.customer_details || null,
-            shipping_details: session.shipping_details || null,
+            shipping_details:
+                session.shipping_details ||
+                session.collected_information?.shipping_details ||
+                null,
             shipping_cost: session.shipping_cost || null,
             metadata: session.metadata || {},
         });
