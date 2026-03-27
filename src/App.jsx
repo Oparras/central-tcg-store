@@ -4,6 +4,8 @@ import { ShoppingCart, Search, User, ChevronLeft, ChevronRight, X, Trash2, Plus,
 import { handleCheckout } from './stripe';
 import './index.css';
 
+
+const [successSessionId, setSuccessSessionId] = useState(null);
 // ─── SUPABASE ─────────────────────────────────────────────────────────────────
 const supabase = createClient(
   import.meta.env.VITE_SUPABASE_URL,
@@ -19,22 +21,81 @@ const bannerImages = [
 ];
 
 // ─── THANK YOU PAGE ───────────────────────────────────────────────────────────
-function ThankYouPage({ onBack }) {
+function ThankYouPage({ onBack, sessionId }) {
   const lastOrder = JSON.parse(sessionStorage.getItem('last-order') || '[]');
-  const orderTotal = lastOrder.reduce((acc, item) => acc + (item.pvp * item.qty), 0);
-  const orderNumber = Math.floor(Math.random() * 900000) + 100000;
+  const [stripeOrder, setStripeOrder] = useState(null);
+  const [loading, setLoading] = useState(!!sessionId);
+
+  useEffect(() => {
+    const loadStripeSession = async () => {
+      if (!sessionId) return;
+
+      try {
+        const res = await fetch(`/api/checkout-session?session_id=${sessionId}`);
+        const data = await res.json();
+
+        if (!res.ok) throw new Error(data.error || 'Error cargando sesión');
+        setStripeOrder(data);
+      } catch (error) {
+        console.error('Error loading Stripe session:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadStripeSession();
+  }, [sessionId]);
+
+  const fallbackSubtotal = lastOrder.reduce(
+    (acc, item) => acc + item.pvp * item.qty,
+    0
+  );
+
+  const subtotal = stripeOrder?.amount_subtotal
+    ? stripeOrder.amount_subtotal / 100
+    : fallbackSubtotal;
+
+  const total = stripeOrder?.amount_total
+    ? stripeOrder.amount_total / 100
+    : fallbackSubtotal;
+
+  const shipping =
+    stripeOrder?.shipping_cost?.amount_total != null
+      ? stripeOrder.shipping_cost.amount_total / 100
+      : Math.max(0, total - subtotal);
+
+  const orderNumber = stripeOrder?.id || `TEMP-${Math.floor(Math.random() * 900000) + 100000}`;
+  const shippingDetails = stripeOrder?.shipping_details;
+  const customer = stripeOrder?.customer_details;
 
   return (
     <div style={{ minHeight: '100vh', background: 'var(--bg-primary, #0a0a0a)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '2rem', color: '#fff' }}>
-      <div style={{ marginBottom: '1.5rem' }}><CheckCircle size={72} color="#22c55e" strokeWidth={1.5} /></div>
-      <h1 style={{ fontSize: '2rem', fontWeight: 800, marginBottom: '0.5rem', letterSpacing: '0.05em' }}>¡PEDIDO CONFIRMADO!</h1>
-      <p style={{ color: '#888', marginBottom: '0.5rem', fontSize: '0.95rem' }}>Gracias por tu compra en <strong style={{ color: 'var(--accent-primary, #e8d5a3)' }}>Central TCG</strong></p>
-      <p style={{ color: '#888', fontSize: '0.85rem', marginBottom: '2rem' }}>Nº de pedido: <strong style={{ color: '#fff' }}>#{orderNumber}</strong></p>
+      <div style={{ marginBottom: '1.5rem' }}>
+        <CheckCircle size={72} color="#22c55e" strokeWidth={1.5} />
+      </div>
+
+      <h1 style={{ fontSize: '2rem', fontWeight: 800, marginBottom: '0.5rem', letterSpacing: '0.05em' }}>
+        ¡PEDIDO CONFIRMADO!
+      </h1>
+
+      <p style={{ color: '#888', marginBottom: '0.5rem', fontSize: '0.95rem' }}>
+        Gracias por tu compra en <strong style={{ color: 'var(--accent-primary, #e8d5a3)' }}>Central TCG</strong>
+      </p>
+
+      <p style={{ color: '#888', fontSize: '0.85rem', marginBottom: '2rem' }}>
+        Nº de pedido: <strong style={{ color: '#fff' }}>#{orderNumber}</strong>
+      </p>
+
+      {loading && (
+        <p style={{ color: '#888', marginBottom: '1.5rem' }}>Cargando detalles del pedido...</p>
+      )}
+
       {lastOrder.length > 0 && (
-        <div style={{ width: '100%', maxWidth: '480px', background: '#111', border: '1px solid #222', borderRadius: '12px', overflow: 'hidden', marginBottom: '2rem' }}>
+        <div style={{ width: '100%', maxWidth: '560px', background: '#111', border: '1px solid #222', borderRadius: '12px', overflow: 'hidden', marginBottom: '2rem' }}>
           <div style={{ padding: '1rem 1.5rem', borderBottom: '1px solid #222', display: 'flex', alignItems: 'center', gap: '0.6rem', fontSize: '0.85rem', fontWeight: 700, letterSpacing: '0.08em', color: '#888' }}>
             <Package size={16} /> RESUMEN DEL PEDIDO
           </div>
+
           <div style={{ padding: '1rem 1.5rem' }}>
             {lastOrder.map(item => (
               <div key={item.id} style={{ display: 'flex', alignItems: 'center', gap: '1rem', paddingBottom: '1rem', marginBottom: '1rem', borderBottom: '1px solid #1a1a1a' }}>
@@ -46,16 +107,54 @@ function ThankYouPage({ onBack }) {
                 <span style={{ fontWeight: 700 }}>€{(item.pvp * item.qty).toFixed(2)}</span>
               </div>
             ))}
-            <div style={{ display: 'flex', justifyContent: 'space-between', paddingTop: '0.5rem', fontWeight: 800 }}>
+
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem', color: '#aaa' }}>
+              <span>Subtotal</span>
+              <span>€{subtotal.toFixed(2)}</span>
+            </div>
+
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem', color: '#aaa' }}>
+              <span>Envío</span>
+              <span>{shipping === 0 ? 'Gratis' : `€${shipping.toFixed(2)}`}</span>
+            </div>
+
+            <div style={{ display: 'flex', justifyContent: 'space-between', paddingTop: '0.75rem', borderTop: '1px solid #1a1a1a', fontWeight: 800 }}>
               <span>TOTAL PAGADO</span>
-              <span style={{ color: 'var(--accent-primary, #e8d5a3)' }}>€{orderTotal.toFixed(2)}</span>
+              <span style={{ color: 'var(--accent-primary, #e8d5a3)' }}>€{total.toFixed(2)}</span>
             </div>
           </div>
         </div>
       )}
-      <div style={{ width: '100%', maxWidth: '480px', background: 'rgba(34,197,94,0.08)', border: '1px solid rgba(34,197,94,0.2)', borderRadius: '10px', padding: '1rem 1.5rem', marginBottom: '2rem', fontSize: '0.88rem', color: '#aaa', lineHeight: '1.7' }}>
+
+      {shippingDetails && (
+        <div style={{ width: '100%', maxWidth: '560px', background: '#111', border: '1px solid #222', borderRadius: '12px', padding: '1rem 1.5rem', marginBottom: '2rem' }}>
+          <div style={{ fontSize: '0.85rem', fontWeight: 700, letterSpacing: '0.08em', color: '#888', marginBottom: '1rem' }}>
+            DIRECCIÓN DE ENVÍO
+          </div>
+
+          <p style={{ marginBottom: '0.25rem' }}>{shippingDetails.name || customer?.name || ''}</p>
+          <p style={{ marginBottom: '0.25rem', color: '#aaa' }}>{shippingDetails.address?.line1 || ''}</p>
+          {shippingDetails.address?.line2 && (
+            <p style={{ marginBottom: '0.25rem', color: '#aaa' }}>{shippingDetails.address.line2}</p>
+          )}
+          <p style={{ marginBottom: '0.25rem', color: '#aaa' }}>
+            {shippingDetails.address?.postal_code || ''} {shippingDetails.address?.city || ''}
+          </p>
+          <p style={{ marginBottom: '0.25rem', color: '#aaa' }}>{shippingDetails.address?.country || ''}</p>
+
+          {customer?.phone && (
+            <p style={{ marginTop: '0.75rem', color: '#888' }}>Teléfono: {customer.phone}</p>
+          )}
+          {customer?.email && (
+            <p style={{ color: '#888' }}>Email: {customer.email}</p>
+          )}
+        </div>
+      )}
+
+      <div style={{ width: '100%', maxWidth: '560px', background: 'rgba(34,197,94,0.08)', border: '1px solid rgba(34,197,94,0.2)', borderRadius: '10px', padding: '1rem 1.5rem', marginBottom: '2rem', fontSize: '0.88rem', color: '#aaa', lineHeight: '1.7' }}>
         📦 <strong style={{ color: '#fff' }}>Envío en 24-48h laborables.</strong> Recibirás un email de confirmación con el número de seguimiento en cuanto tu pedido salga de nuestro almacén.
       </div>
+
       <button onClick={onBack} style={{ padding: '0.9rem 2.5rem', background: 'var(--accent-primary, #e8d5a3)', color: '#000', border: 'none', borderRadius: '6px', fontWeight: 800, fontSize: '0.9rem', cursor: 'pointer' }}>
         SEGUIR COMPRANDO
       </button>
@@ -424,9 +523,20 @@ export default function App() {
     loadProducts();
     const consent = localStorage.getItem('cookie-consent');
     if (!consent) setTimeout(() => setIsCookieVisible(true), 1500);
+
     const params = new URLSearchParams(window.location.search);
-    if (params.get('success')) { setPage('thankyou'); window.history.replaceState({}, document.title, '/'); }
-    else if (params.get('canceled')) { setPage('canceled'); window.history.replaceState({}, document.title, '/'); }
+    const success = params.get('success');
+    const canceled = params.get('canceled');
+    const sessionId = params.get('session_id');
+
+    if (success) {
+      setSuccessSessionId(sessionId || null);
+      setPage('thankyou');
+      window.history.replaceState({}, document.title, '/');
+    } else if (canceled) {
+      setPage('canceled');
+      window.history.replaceState({}, document.title, '/');
+    }
   }, []);
 
   const loadProducts = async () => {
@@ -459,7 +569,18 @@ export default function App() {
     handleCheckout(cart);
   };
 
-  if (page === 'thankyou') return <ThankYouPage onBack={() => { setCart([]); setPage('shop'); }} />;
+  if (page === 'thankyou') {
+    return (
+      <ThankYouPage
+        sessionId={successSessionId}
+        onBack={() => {
+          setCart([]);
+          setPage('shop');
+          setSuccessSessionId(null);
+        }}
+      />
+    );
+  }
 
   if (page === 'canceled') return (
     <div style={{ minHeight: '100vh', background: '#0a0a0a', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: '#fff', gap: '1rem' }}>
